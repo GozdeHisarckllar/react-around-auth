@@ -1,0 +1,43 @@
+@import url('./__vector-logo/header__vector-logo.css');
+@import url('./__account-state/header__account-state.css');
+@import url('./__account-info/header__account-info.css');
+@import url('./__account-email/header__account-email.css');
+
+.header {
+    display: flex;
+    max-width: calc(100% - 400px);
+    margin: 0 auto;
+    padding: 45px 0 0;
+    border-bottom: 1px solid rgb(84,84,84, .7);
+}
+
+@media screen and (max-width: 1279px){
+  .header {
+    max-width: calc(100% - 250px);
+  }
+}
+
+@media screen and (max-width: 1144px){
+  .header {
+    max-width: calc(100% - 200px);
+  }
+}
+
+@media screen and (max-width: 1024px){
+  .header {
+    max-width: calc(100% - 184px);
+  }
+}
+
+@media screen and (max-width: 768px){
+  .header {
+    max-width: calc(100% - 80px);
+  }
+}
+
+@media screen and (max-width: 604px){
+  .header {
+    max-width: 100%;
+    padding-top: 28px;
+  }
+}
