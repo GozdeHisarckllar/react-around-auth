@@ -17,6 +17,7 @@
 @import url('./__input-container/_type/form__input-container_type_auth.css');
 @import url('./__item/_type/form__item_type_error.css');
 @import url('./__auth-redirect/form__auth-redirect.css');
+@import url('./__label/_type/form__label_type_auth.css');
 .form {
     width: 100%;
     background: #FFF;

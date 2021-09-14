@@ -5,6 +5,8 @@
 @import url('./__image/modal__image.css');
 @import url('./__image-caption/modal__image-caption.css');
 @import url('./__container/_size/modal__container_size_fit.css');
+@import url('./__container/_type/modal__container_type_info.css');
+@import url('./__close-btn/_type/modal__close-btn_type_info.css');
 
 .modal {
     position: fixed;

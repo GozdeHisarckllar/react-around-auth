@@ -3,6 +3,7 @@ import { Route, Switch, Redirect } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import Register from './Register';
 import Login from './Login';
+import InfoTooltip from './InfoTooltip';
 import Header from './Header';
 import Main from './Main';
 import Footer from './Footer';
@@ -27,8 +28,9 @@ function App() {
 
   const [currentUser, setCurrentUser] = useState({});
 
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(true);
   const [accountState, setAccountState] = useState("");
+  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(true);
 
   useEffect(() => {
     api.getUserInfo()
@@ -136,6 +138,7 @@ function App() {
     setIsEditAvatarPopupOpen(false);
     setSelectedCard(null);
     setIsConfirmationPopupOpen(false);
+    setIsInfoTooltipOpen(false);
   }
 
   function handleRemoveCardClick(card) {
@@ -149,7 +152,7 @@ function App() {
   return (
     <div className="page__container">
       <CurrentUserContext.Provider value={currentUser}>
-        <Header loggedIn={loggedIn} handleLogout={handleLogout} accountState={accountState}/>
+        <Header loggedIn={loggedIn} onSignOut={handleLogout} accountState={accountState}/>
         <Switch>
           <ProtectedRoute exact path="/" loggedIn={loggedIn}>
             <Main
@@ -196,6 +199,10 @@ function App() {
             <Login onSetAccount={setAccountState}/>
           </Route>
         </Switch>
+        <InfoTooltip 
+          isOpen={isInfoTooltipOpen}
+          onClose={closeAllPopups}
+        />
       </CurrentUserContext.Provider>
     </div>
   );

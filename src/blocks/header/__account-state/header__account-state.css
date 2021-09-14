@@ -8,3 +8,9 @@
     text-align: right;
     color: #FFFFFF;
 }
+
+@media screen and (max-width: 604px){
+    .header__account-state {
+      margin-right: 30px;
+    }
+  }

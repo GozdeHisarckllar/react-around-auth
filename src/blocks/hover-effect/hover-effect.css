@@ -1,5 +1,5 @@
 .hover-effect {
-    transition: all .2s ease-in-out;
+    transition: opacity .2s ease-in-out;/*all*/
 }
   
 .hover-effect:hover {
