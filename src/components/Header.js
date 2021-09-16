@@ -35,7 +35,7 @@ const Header = ({ loggedIn, onSignOut, accountState }) => {
           <p className="header__account-email">email@mail.com</p>
           <Link 
             to={"/signin"} 
-            className="header__account-state hover-effect" 
+            className="header__account-state header__account-state_desktop hover-effect" 
             onClick={onSignOut}
           >
           Log out

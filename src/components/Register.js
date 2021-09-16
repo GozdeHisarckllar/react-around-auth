@@ -4,8 +4,13 @@ import { useFormAndValidation } from '../hooks/useFormAndValidation';
 import { inputElementErrorClassName, errorClassName } from '../utils/constants';
 
 
-const Register = ({ onSetAccount }) => {
-
+const Register = ({ onRegister, onSetAccountState }) => {
+  //{"error":"User with this email address already exists"}
+//data: {_id: "614249d767c0c800131e97a5", email: "gozde@mail.com"} practicum
+// example@mail.com  practicum
+//{"data":{"_id":"61424e9c67c0c800131e97be","email":"example@gmail.com"}} practicum
+// gozde@gmail.com  practicum
+// gozde@example1.com -4
   const {
     values, 
     errors, 
@@ -16,11 +21,18 @@ const Register = ({ onSetAccount }) => {
   } = useFormAndValidation();
 
   useEffect(() => {
-    onSetAccount("Log in");
+    onSetAccountState("Log in");
   });
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const { password, email } = values;
+    onRegister(password, email);
+  }
+
   return(
     <div className="auth-container">
-      <form action="#" className="form form_type_auth" name="sign-up">
+      <form action="#" onSubmit={handleSubmit} className="form form_type_auth" name="sign-up">
         <fieldset className="form__input-container form__input-container_type_auth">
           <legend className="form__caption form__caption_type_auth">Sign up</legend>
           <label className="form__label form__label_type_auth">

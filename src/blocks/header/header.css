@@ -5,6 +5,7 @@
 @import url('./__account-email/header__account-email.css');
 @import url('./__account-info/_mobile/header__account-info_mobile.css');
 @import url('./__account-state/_mobile/header__account-state_mobile.css');
+@import url('./__account-state/_desktop/header__account-state_desktop.css');
 @import url('./__account-icon-mobile/header__account-icon-mobile.css');
 @import url('./__account-info/_opened/header__account-info_opened.css');
 @import url('./__account-email/_opened/header__account-email_opened.css');

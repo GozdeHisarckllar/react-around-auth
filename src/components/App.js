@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Route, Switch, Redirect, useHistory } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import Register from './Register';
 import Login from './Login';
 import InfoTooltip from './InfoTooltip';
+import * as auth from '../utils/auth';
 import Header from './Header';
 import Main from './Main';
 import Footer from './Footer';
@@ -28,9 +29,46 @@ function App() {
 
   const [currentUser, setCurrentUser] = useState({});
 
-  const [loggedIn, setLoggedIn] = useState(true);
+  const [loggedIn, setLoggedIn] = useState(false);
   const [accountState, setAccountState] = useState("");
-  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(true);
+  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
+  const [isAuthSuccess, setIsAuthSuccess] = useState(true);
+  //const [ authErrorMessage, setAuthErrorMessage] = useState('');
+
+  const history = useHistory();
+
+  function handleAccountState(state) {
+    setAccountState(state);
+  }
+
+  function handleRegister(password, email) {
+    auth.register(password, email)
+      .then((res) => {
+        if (res) {
+        setIsAuthSuccess(true);
+        history.push('/signin');
+        } else {
+          setIsAuthSuccess(false);
+        }
+      })
+      .catch((err) => console.log(err))// then
+      .finally(() => setIsInfoTooltipOpen(true));
+  }
+
+  function handleLogin(password, email) {
+    auth.authorize(password, email)
+      .then((data) => {
+        if (data.token) {
+          setLoggedIn(true);
+          history.push('/');
+          return;
+        } else {
+          setIsAuthSuccess(false);
+          setIsInfoTooltipOpen(true);
+        }
+      })
+      .catch((err) => console.log(err));
+  }
 
   useEffect(() => {
     api.getUserInfo()
@@ -193,14 +231,18 @@ function App() {
             />
           </ProtectedRoute>
           <Route path="/signup">
-            <Register onSetAccount={setAccountState}/>
+            <Register onRegister={handleRegister} onSetAccountState={handleAccountState}/>
           </Route>
           <Route path="/signin">
-            <Login onSetAccount={setAccountState}/>
+            <Login onLogin={handleLogin} onSetAccountState={handleAccountState}/>
+          </Route>
+          <Route path="*">
+            {loggedIn ? <Redirect to="/" /> : <Redirect to="/signin" />}
           </Route>
         </Switch>
         <InfoTooltip 
           isOpen={isInfoTooltipOpen}
+          isAuthSuccess={isAuthSuccess}
           onClose={closeAllPopups}
         />
       </CurrentUserContext.Provider>

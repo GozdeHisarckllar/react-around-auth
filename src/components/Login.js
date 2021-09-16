@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 import { useFormAndValidation } from "../hooks/useFormAndValidation";
 import { inputElementErrorClassName, errorClassName } from "../utils/constants";
 
-const Login = ({ onSetAccount }) => {
-    const {
+const Login = ({ onLogin, onSetAccountState }) => {
+    
+  const {
         values, 
         errors, 
         isFormValid, 
@@ -14,12 +15,18 @@ const Login = ({ onSetAccount }) => {
       } = useFormAndValidation();
 
     useEffect(() => {
-        onSetAccount("Sign up");
+      onSetAccountState("Sign up");
     });
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      const { password, email } = values;
+      onLogin(password, email);
+    }
 
     return(
         <div className="auth-container">
-        <form action="#" className="form form_type_auth" name="sign-up">
+        <form action="#" onSubmit={handleSubmit} className="form form_type_auth" name="sign-up">
           <fieldset className="form__input-container form__input-container_type_auth">
             <legend className="form__caption form__caption_type_auth">Log in</legend>
             <label className="form__label form__label_type_auth">
