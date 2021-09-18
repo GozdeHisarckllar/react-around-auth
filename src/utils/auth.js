@@ -9,19 +9,16 @@ export const register = (password, email) => {
     },
     body: JSON.stringify({ password, email })
   })
-  .then((response) => {
-    try {
-      if (response.ok){// 201 response.status
-        return response.json();
+  .then((res) => {
+    if (res.ok) {
+        return res.json();
       }
-      } catch(err){
-        return (err);
-    }
+  
+      return Promise.reject(res.status);
   })
   .then((res) => {
       return res;
-  })
-  .catch((err) => console.log(err));
+  });
 }
 
 
@@ -34,14 +31,37 @@ export const authorize = (password, email) => {
     },
     body: JSON.stringify({ password, email })
   })
-    .then((res) => res.json())
+    .then((res) => {
+      if (res.ok) {
+        return res.json();
+      }
+  
+      return Promise.reject(res.status);
+    })
     .then((data) => {
       if (data.token) {
         localStorage.setItem('token', data.token);
         return data;
-      } else {
-        return false;
+      } else { 
+        return;
       }
+    });
+}
+
+export const getAccountInfo = (token) => {
+  return fetch(`${BASE_URL}/users/me`, {
+    method: 'GET',
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization" : `Bearer ${token}`
+    }
+  })
+    .then((res) => {
+      if (res.ok) {
+        return res.json();
+      }
+  
+      return Promise.reject(res.status);
     })
-    .catch((err) => console.log(err));
+    .then(data => data);
 }

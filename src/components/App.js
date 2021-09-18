@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Route, Switch, Redirect, useHistory } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import Register from './Register';
@@ -30,15 +30,20 @@ function App() {
   const [currentUser, setCurrentUser] = useState({});
 
   const [loggedIn, setLoggedIn] = useState(false);
-  const [accountState, setAccountState] = useState("");
+  const [isRegisterRendered, setIsRegisterRendered] = useState(false);
   const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
   const [isAuthSuccess, setIsAuthSuccess] = useState(true);
-  //const [ authErrorMessage, setAuthErrorMessage] = useState('');
+  const [userAccountEmail, setUserAccountEmail] = useState('');
+  const [authErrorMessage, setAuthErrorMessage] = useState('');
 
   const history = useHistory();
 
-  function handleAccountState(state) {
-    setAccountState(state);
+  function handleRenderRegister(boolean) {
+    setIsRegisterRendered(boolean)
+  }
+
+  function handleAccountEmail(email) {
+    setUserAccountEmail(email);
   }
 
   function handleRegister(password, email) {
@@ -47,74 +52,115 @@ function App() {
         if (res) {
         setIsAuthSuccess(true);
         history.push('/signin');
-        } else {
-          setIsAuthSuccess(false);
         }
       })
-      .catch((err) => console.log(err))// then
+      .catch((err) => {
+        setIsAuthSuccess(false);
+        if (err === 400) {
+          setAuthErrorMessage('User with this email address already exists.');
+        } else {
+          setAuthErrorMessage('Oops, something went wrong! Please try again.');
+        }
+      })
       .finally(() => setIsInfoTooltipOpen(true));
   }
 
   function handleLogin(password, email) {
     auth.authorize(password, email)
       .then((data) => {
-        if (data.token) {
-          setLoggedIn(true);
-          history.push('/');
-          return;
-        } else {
-          setIsAuthSuccess(false);
-          setIsInfoTooltipOpen(true);
-        }
+        checkToken();
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        setIsAuthSuccess(false);
+        if (err === 401) {
+          setAuthErrorMessage('Incorrect email address or password');
+        } else {
+          setAuthErrorMessage('Oops, something went wrong! Please try again.');
+        }
+        setIsInfoTooltipOpen(true);
+      });
+  }
+
+  const checkToken = useCallback(() => {
+    if (localStorage.getItem('token')) {
+      const token = localStorage.getItem('token');
+
+      auth.getAccountInfo(token)
+        .then((res) => {
+          if (res) {
+            handleAccountEmail(res.data.email);
+            setLoggedIn(true);
+          }
+        })
+        .then(() => {
+          history.push('/');
+        })
+        .catch((err) => {
+          if (err === 400) {
+            console.log('Token not provided or provided in the wrong format');
+          } else if (err === 401) {
+            console.log('The provided token is invalid');
+          }
+        });
+    }
+  }, [history]);
+
+  useEffect(() => {
+    checkToken();
+  }, [checkToken]);
+
+  function handleLogout() {
+    localStorage.removeItem('token');
+    setLoggedIn(false);
+    handleAccountEmail('');
+    history.push('/signin');
   }
 
   useEffect(() => {
     api.getUserInfo()
-    .then((info) => {
-      setCurrentUser(info);
-    })
-    .catch((err) => console.log(err));
+      .then((info) => {
+        setCurrentUser(info);
+      })
+      .catch((err) => console.log(err));
   }, []);
 
   function handleUpdateUser({name, about}) {
     setIsLoading(true);
     api.setUserProfileInfo({name, about})
-    .then((editedInfo) => {
-      setCurrentUser(editedInfo);
-    })
-    .then(() => closeAllPopups())
-    .catch((err) => console.log(err))
-    .finally(() => {
-      setIsLoading(false);
-    });
+      .then((editedInfo) => {
+        setCurrentUser(editedInfo);
+      })
+      .then(() => closeAllPopups())
+      .catch((err) => console.log(err))
+      .finally(() => {
+        setIsLoading(false);
+      });
   }
 
   function handleUpdateAvatar({avatar}) {
     setIsLoading(true);
     api.setProfileAvatar({avatar})
-    .then((editedInfo) => {
-      setCurrentUser(editedInfo);
-    })
-    .then(() => closeAllPopups())
-    .catch((err) => console.log(err))
-    .finally(() => {
-      setIsLoading(false);
-    });
+      .then((editedInfo) => {
+        setCurrentUser(editedInfo);
+      })
+      .then(() => closeAllPopups())
+      .catch((err) => console.log(err))
+      .finally(() => {
+        setIsLoading(false);
+      });
   }
 
   function handleAddPlaceSubmit({name, link}) {
     setIsLoading(true);
     api.addNewCard({name, link})
-    .then((newCard) => {
-      setCards([newCard, ...cards]);
-    })
-    .then(() => closeAllPopups())
-    .catch((err) => console.log(err))
-    .finally(() => {
-      setIsLoading(false);
-    });
+      .then((newCard) => {
+        setCards([newCard, ...cards]);
+      })
+      .then(() => closeAllPopups())
+      .catch((err) => console.log(err))
+      .finally(() => {
+        setIsLoading(false);
+      });
   }
 
   function handleCardLike(card) {
@@ -123,27 +169,27 @@ function App() {
     });
 
     api.changeLikeCardStatus(card._id, !isLiked)
-    .then((updatedCard) => {
-      setCards(cards.map((initialCard) => {
-        return initialCard._id === card._id ? updatedCard : initialCard
-      }));
-    })
-    .catch((err) => console.log(err));
+      .then((updatedCard) => {
+        setCards(cards.map((initialCard) => {
+          return initialCard._id === card._id ? updatedCard : initialCard
+        }));
+      })
+      .catch((err) => console.log(err));
   }
 
   function handleCardDelete(card) {
     setIsLoading(true);
     api.removeCard(card._id)
-    .then(() => {
-      setCards(cards.filter((initialCard) => {
-        return initialCard._id !== card._id;
-      }))
-    })
-    .then(() => closeAllPopups())
-    .catch((err) => console.log(err))
-    .finally(() => {
-      setIsLoading(false);
-    });
+      .then(() => {
+        setCards(cards.filter((initialCard) => {
+          return initialCard._id !== card._id;
+        }))
+      })
+      .then(() => closeAllPopups())
+      .catch((err) => console.log(err))
+      .finally(() => {
+        setIsLoading(false);
+      });
   }
 
   useEffect(() => {
@@ -184,13 +230,15 @@ function App() {
     setDeletedCard(card);
   }
 
-  function handleLogout() {
-    setLoggedIn(false);
-  }
   return (
     <div className="page__container">
       <CurrentUserContext.Provider value={currentUser}>
-        <Header loggedIn={loggedIn} onSignOut={handleLogout} accountState={accountState}/>
+        <Header 
+          loggedIn={loggedIn} 
+          onSignOut={handleLogout} 
+          userAccountEmail={userAccountEmail} 
+          isRegisterRendered={isRegisterRendered}
+        />
         <Switch>
           <ProtectedRoute exact path="/" loggedIn={loggedIn}>
             <Main
@@ -231,10 +279,16 @@ function App() {
             />
           </ProtectedRoute>
           <Route path="/signup">
-            <Register onRegister={handleRegister} onSetAccountState={handleAccountState}/>
+            <Register 
+              onRegister={handleRegister} 
+              onRenderRegister={handleRenderRegister}
+            />
           </Route>
           <Route path="/signin">
-            <Login onLogin={handleLogin} onSetAccountState={handleAccountState}/>
+            <Login 
+              onLogin={handleLogin} 
+              onRenderRegister={handleRenderRegister}
+            />
           </Route>
           <Route path="*">
             {loggedIn ? <Redirect to="/" /> : <Redirect to="/signin" />}
@@ -243,6 +297,7 @@ function App() {
         <InfoTooltip 
           isOpen={isInfoTooltipOpen}
           isAuthSuccess={isAuthSuccess}
+          authErrorMessage={authErrorMessage}
           onClose={closeAllPopups}
         />
       </CurrentUserContext.Provider>

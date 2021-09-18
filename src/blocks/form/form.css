@@ -9,7 +9,6 @@
 @import url('./__button/_type/form__button_type_auth.css');
 /*@import url('./__button/_margin/form__button_margin_small.css');*/
 @import url('./__button/_disabled/form__button_disabled.css');
-
 @import url('./__label/form__label.css');
 @import url('./__caption/_type/form__caption_type_auth.css');
 @import url('./__item/_el/form__item_el_email.css');
@@ -18,6 +17,7 @@
 @import url('./__item/_type/form__item_type_error.css');
 @import url('./__auth-redirect/form__auth-redirect.css');
 @import url('./__label/_type/form__label_type_auth.css');
+
 .form {
     width: 100%;
     background: #FFF;
